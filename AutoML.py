@@ -40,7 +40,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 
 # Scikit-learn - Regression Models
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neighbors import KNeighborsRegressor
@@ -828,10 +828,6 @@ def regression(x,y):
         param_grid = {'n_estimators': list(range(50, 151, 25))}
         return grid_search_model(RandomForestRegressor, param_grid, train_x, train_y, test_x, test_y)
 
-    def gradient_boosting(train_x, train_y, test_x, test_y):
-        param_grid = {'n_estimators': list(range(50, 151, 25)), 'learning_rate': np.linspace(0.05, 0.3, 5)}
-        return grid_search_model(GradientBoostingRegressor, param_grid, train_x, train_y, test_x, test_y)
-
     def xgb_reg(train_x, train_y, test_x, test_y):
         param_grid = {'n_estimators': list(range(50, 151, 25)), 'max_depth': list(range(3, 7))}
         return grid_search_model(XGBRegressor, param_grid, train_x, train_y, test_x, test_y)
@@ -843,6 +839,20 @@ def regression(x,y):
     def knn_reg(train_x, train_y, test_x, test_y):
         param_grid = {'n_neighbors': list(range(3, 11))}
         return grid_search_model(KNeighborsRegressor, param_grid, train_x, train_y, test_x, test_y)
+
+    def elastic_net_reg(train_x, train_y, test_x, test_y):
+        param_grid = {
+            'alpha': np.linspace(0.01, 1.0, 10),
+            'l1_ratio': np.linspace(0.1, 0.9, 5)}
+        return grid_search_model(ElasticNet, param_grid, train_x, train_y, test_x, test_y)
+    
+    def svr_reg(train_x, train_y, test_x, test_y):
+        param_grid = {
+            'C': [0.1, 1, 10],
+            'epsilon': [0.01, 0.1, 1],
+            'kernel': ['rbf', 'linear']}
+        return grid_search_model(SVR, param_grid, train_x, train_y, test_x, test_y)
+
 
     def drop_columns(d):
         st.subheader("Drop Unwanted Columns")
@@ -872,10 +882,12 @@ def regression(x,y):
             gradient_boosting,
             xgb_reg,
             lgbm_reg,
-            knn_reg
+            knn_reg,
+            elastic_net_reg, 
+            svr_reg
         ]
         results = []
-        names = ['Linear', 'Ridge', 'Lasso', 'DecisionTree', 'RandomForest', 'GradientBoost', 'XGB', 'LGBM', 'KNN']
+        names = ['Linear', 'Ridge', 'Lasso', 'DecisionTree', 'RandomForest', 'XGB', 'LGBM', 'KNN', "ElasticNet",'SVR']
 
         for model_func in models:
             result = model_func(train_x, train_y, test_x, test_y)
