@@ -2,7 +2,7 @@
 
 An interactive and no-code AutoML tool built with **Streamlit** that allows users to:
 
-- 📥 Upload a CSV dataset
+- 📥 Upload a CSV /xlsx dataset
 - 🔍 Perform EDA (Exploratory Data Analysis)
 - 🧠 Train multiple classification or regression models
 - 📊 Evaluate model performance
