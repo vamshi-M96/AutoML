@@ -422,7 +422,7 @@ def eda(data):
         
         cols_to_drop = st.multiselect("Select columns to drop", options=d.columns)
 
-        if st.button("Drop Selected Columns"):
+        if cols_to_drop:
             d_dropped = d.drop(columns=cols_to_drop)
             st.success(f"✅ Dropped columns: {', '.join(cols_to_drop)}")
             st.subheader("Updated Data")
