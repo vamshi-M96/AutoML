@@ -1,22 +1,25 @@
 # Core
-numpy
-pandas
-matplotlib
-seaborn
+numpy==1.23.5
+pandas==1.5.3
+matplotlib==3.6.3
+seaborn==0.12.2
 
 # Streamlit
-streamlit
+streamlit==1.31.1
 
-# Profiling & Visualization
-plotly
-sweetviz
-ppscore
+# Visualization & Profiling
+plotly==5.16.1
+sweetviz==2.3.1
+ppscore==1.3.0
 
-# Scikit-learn and ML Models
-scikit-learn
-xgboost
-lightgbm
-joblib
+# Machine Learning
+scikit-learn==1.2.2
+xgboost==1.7.6
+lightgbm==3.3.5
+joblib==1.2.0
 
-# Optional: to handle Excel file upload
-openpyxl
+# Excel support
+openpyxl==3.1.2
+
+# Required for Sweetviz internals
+setuptools
