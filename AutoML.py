@@ -402,7 +402,7 @@ def eda(data):
         df=labelencoding(df)
 
     #RENAME
-    if st.sidebar.toggle("rename"):
+    if st.sidebar.toggle("Rename"):
         df=rename(df)
 
     
