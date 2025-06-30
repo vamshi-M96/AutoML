@@ -715,7 +715,12 @@ def classification(x,y):
         train_x,test_x,train_y,test_y = train_test_split(x,y,test_size=0.2,random_state=10)
         le = LabelEncoder()
         train_y = le.fit_transform(train_y.values.ravel())
-        test_y = le.transform(test_y.values.ravel())
+        
+        try:
+            test_y = le.transform(test_y.values.ravel())
+        except ValueError as e:
+                st.error("💡 Try encoding the full label column before splitting the data.")
+                st.stop() 
 
         data = df(train_x,train_y,test_x,test_y)
 
