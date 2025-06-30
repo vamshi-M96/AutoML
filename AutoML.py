@@ -1078,3 +1078,13 @@ with tab2:
 
         #st.write("### 🏆 Best Model")
        # st.write(st.session_state.best_model)}
+
+st.markdown(
+"""
+<hr style="margin-top: 50px;">
+<div style="text-align: center; color: grey; font-size: 14px;">
+    🧠 AutoML App by <strong>Vamshi</strong> | Built with Streamlit 💻
+</div>
+""",
+unsafe_allow_html=True
+)
