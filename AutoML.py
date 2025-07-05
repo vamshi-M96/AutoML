@@ -1100,7 +1100,7 @@ from sklearn.utils.validation import check_is_fitted
 with tab4:
     st.header("🔮 Predict with Trained Model")
 
-    model = st.session_state.get("best_model", None)
+    model = st.session_state.best_model
     features = st.session_state.get("feature_names", [])
     df_raw = st.session_state.get("raw_df", None)
     task_type = st.session_state.get("task", "Classification")
