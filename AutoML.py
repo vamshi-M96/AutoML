@@ -78,8 +78,7 @@ st.set_page_config(page_title="AutoML Studio", layout="wide")
 
 st.markdown(
     """
-    <h1 style='text-align: center;'>🤖 AutoML Studio</h1>
-    <h4 style='text-align: center; color: gray;'>Train, Tune & Predict with Ease</h4>
+    <h1 style='text-align: center;'>🤖 AutoML Studio: Train, Tune & Predict with Ease</h1>
     """,
     unsafe_allow_html=True
 )
