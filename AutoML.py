@@ -74,7 +74,9 @@ from sklearn.exceptions import FitFailedWarning
 import warnings
 warnings.filterwarnings("ignore")
 
-st.title("🧠 Unified Machine Learning App")
+st.set_page_config(page_title="AutoML Studio", layout="wide")
+st.title("🤖 AutoML Studio: Train, Tune & Predict")
+
 st.markdown("<h3 style='text-align: center;'>📈Classification & 📉Regression</h3>", unsafe_allow_html=True)
 
 
