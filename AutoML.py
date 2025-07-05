@@ -1189,7 +1189,7 @@ with tab4:
                 else:
                     new_data = pd.read_excel(uploaded_pred_file)
                 if "Unnamed: 0" in new_data.columns:
-                    new_data=new_data.drop(columns=['Unnamed: 0'],inplace = True)
+                    new_data=new_data.drop(columns=['Unnamed: 0'])
                 st.write("📄 Preview of Uploaded Data:")
                 st.dataframe(new_data.head())
 
