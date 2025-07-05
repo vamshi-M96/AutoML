@@ -1101,9 +1101,10 @@ with tab4:
     st.header("🔮 Predict with Trained Model")
 
     model = st.session_state.best_model
-    features = st.session_state.get("feature_names", [])
-    df_raw = st.session_state.get("raw_df", None)
+    features = st.session_state.feature_names
+    df_raw = st.session_state.raw_df.copy()
     task_type = st.session_state.get("task", "Classification")
+
     label_encoder = st.session_state.get("label_encoder", None)
 
     if model is None or df_raw is None or not features:
