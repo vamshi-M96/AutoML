@@ -1101,6 +1101,10 @@ with tab4:
     st.header("🔮 Predict with Trained Model")
     
     model = st.session_state.best_model
+    if "feature_names" not in st.session_state:
+        st.error("⚠️ Feature names not found. Please train a model first.")
+        st.stop()
+
     features = st.session_state.feature_names
     df_raw = st.session_state.raw_df.copy()
     task_type = st.session_state.get("task", "Classification")
