@@ -1095,9 +1095,8 @@ with tab2:
 
 
 
-
 with tab4:
-     st.header("🔮 Predict with Trained Model")
+    st.header("🔮 Predict with Trained Model")
 
     model = st.session_state.get("best_model", None)
     features = st.session_state.get("feature_names", [])
@@ -1133,9 +1132,11 @@ with tab4:
             if task_type == "Classification" and label_encoder:
                 label = label_encoder.inverse_transform([pred])[0]
                 st.success(f"Prediction: `{pred}` → **{label}**")
+                df_input["Prediction Label"] = label
             else:
                 st.success(f"Prediction: `{pred}`")
-            st.dataframe(df_input.assign(Prediction=pred))
+            df_input["Prediction"] = pred
+            st.dataframe(df_input)
 
     else:
         st.subheader("📥 Upload Data for Prediction")
@@ -1146,17 +1147,18 @@ with tab4:
                 new_data.drop(columns=["Unnamed: 0"], inplace=True)
 
             st.dataframe(new_data.head())
+
             if all(f in new_data.columns for f in features):
                 if st.button("🔮 Predict on File"):
                     preds = model.predict(new_data[features])
                     new_data["Prediction"] = preds
                     if task_type == "Classification" and label_encoder:
                         new_data["Prediction Label"] = label_encoder.inverse_transform(preds)
-                    st.success("✅ Done!")
+                    st.success("✅ Predictions complete.")
                     st.dataframe(new_data)
                     st.download_button("📁 Download", new_data.to_csv(index=False), "predictions.csv")
             else:
-                st.error("Missing required features.")
+                st.error("❌ Missing required features in uploaded file.")
 
 
 st.markdown(
