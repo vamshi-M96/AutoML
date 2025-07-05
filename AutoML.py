@@ -80,7 +80,7 @@ st.set_page_config(page_title="AutoML Studio", layout="wide")
 st.markdown(
     """
     <h1 style='text-align: center;'>🤖 AutoML Studio</h1>
-    <p style='text-align: center; font-size:8px; color: gray;'>
+    <p style='text-align: center; font-size:16px; color: gray;'>
         Train 🧠 • Tune 🧬 • Predict 🎯
     </p>
     <h4 style='text-align: center; color: white;'>📈 Classification | 📉 Regression</h4>
