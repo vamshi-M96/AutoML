@@ -1017,7 +1017,9 @@ if "best_model" not in st.session_state:
     st.session_state.best_model = None
 
 # App layout
-tab1, tab2, tab3 = st.tabs(["\U0001F4CA EDA", "\U0001F9E0 Modeling", "\U0001F4C8 Visualization"])
+
+# App layout
+tab1, tab2, tab3, tab4 = st.tabs(["📊 EDA", "🧠 Modeling", "📈 Visualization", "🔮 Prediction"])
 
 with tab1:
     uploaded_file = st.file_uploader("Upload your dataset", type=["csv", "xlsx"])
@@ -1034,6 +1036,7 @@ with tab1:
                 df = pd.read_excel(uploaded_file)
 
         st.session_state.df = df
+        st.session_state.raw_df=df.copy()
         st.header("\U0001F9EE Exploratory Data Analysis (EDA)")
 
         if len(df) > 5000:
@@ -1054,6 +1057,8 @@ with tab2:
         x = df.drop(columns=[target])
         y = df[[target]]
 
+        st.session_state.feature_names = list(x.columns) 
+
         task = st.radio("\U0001F4CC Task Type", ["-- Select Task --","Classification", "Regression"])
         st.session_state.task = task
 
@@ -1072,12 +1077,88 @@ with tab2:
         else:
             st.info("Please select a task type to continue.")
 
-   # {if st.session_state.result is not None:
-       # st.write("### 📝 Model Results")
-        #st.dataframe(st.session_state.result)
 
-        #st.write("### 🏆 Best Model")
-       # st.write(st.session_state.best_model)}
+
+
+with tab4:
+    st.header("🔮 Prediction on New Data")
+
+    if 'best_model' not in st.session_state or st.session_state.best_model is None:
+        st.warning("⚠️ Please train a model first in the Modeling tab.")
+        st.stop()
+
+    if 'raw_df' not in st.session_state:
+        st.warning("⚠️ No original data found. Please upload a dataset.")
+        st.stop()
+
+    if 'feature_names' in st.session_state:
+        features = st.session_state.feature_names
+    else:
+        st.error("❌ Feature names not found. Please train a model first.")
+        st.stop()
+
+    df_raw = st.session_state.raw_df.copy()  # ✅ Use raw data before EDA
+    model = st.session_state.best_model
+    task_type = st.session_state.get("task", "Classification")
+    st.write('Best Model=',model)
+    st.subheader("📄 Original Data Preview")
+    st.dataframe(df_raw.head(3))
+
+  
+
+
+
+
+    if task_type == "Classification":
+            st.info(f"🎯 Classification task — predicting: **{target}**")
+            st.write('Target Values',df_raw[target].unique())
+            if 'label_encoder' in st.session_state:
+                class_labels = st.session_state.label_encoder.classes_
+                st.write("🧾 Possible categories:", ", ".join([str(c) for c in class_labels]))
+    else:
+        st.info("📈 Regression task — predicting numeric outcome")
+
+
+    input_data = {}
+    for col in features:
+        # Default min/max
+        min_, max_ = (0, 100)
+
+        if col in df_raw.columns:
+            if pd.api.types.is_numeric_dtype(df_raw[col]):
+                # If numeric, compute min/max and show numeric input
+                min_, max_ = df_raw[col].min(), df_raw[col].max()
+                default_val = (min_ + max_) / 2
+                val = st.text_input(f"{col} (Range: {round(min_,2)}–{round(max_,2)})", value=str(default_val), key=col)
+                try:
+                    input_data[col] = float(val)
+                except:
+                    st.warning(f"⚠️ Invalid input for {col}")
+                    st.stop()
+
+            else:
+                # If categorical, use radio buttons with unique categories
+                options = df_raw[col].dropna().unique().tolist()
+                selected = st.radio(f"{col} (Categorical)", options=options, key=col)
+                input_data[col] = selected
+        else:
+            st.warning(f"⚠️ Column '{col}' not found in original data.")
+            st.stop()
+
+    if st.button("🔮 Predict"):
+        input_df = pd.DataFrame([input_data])
+        try:
+            pred = model.predict(input_df)
+            st.success(f"✅ Predicted value for **{target}**: `{pred[0]}`")
+            st.dataframe(input_df.assign(Prediction=pred))
+        except Exception as e:
+            st.error(f"❌ Prediction failed: {e}")
+
+
+
+
+
+
 st.markdown(
     """
     <hr style="margin-top: 50px;">
