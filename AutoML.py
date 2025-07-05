@@ -1104,7 +1104,8 @@ with tab4:
     task_type = st.session_state.get("task", "Classification")
     label_encoder = st.session_state.get("label_encoder", None)
 
-    if not model or not df_raw or not features:
+    if model is None or df_raw is None or not features:
+:
         st.error("⚠️ Model or data missing. Please train a model first.")
         st.stop()
 
