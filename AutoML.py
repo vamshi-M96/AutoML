@@ -1116,6 +1116,7 @@ with tab4:
 
     mode = st.radio("Choose Mode", ["Manual Input", "Batch Prediction via File"])
 
+    # ------------------------- MANUAL -------------------------
     if mode == "Manual Input":
         st.subheader("📝 Input Feature Values")
         input_data = {}
@@ -1127,20 +1128,25 @@ with tab4:
             input_data[col] = val
 
         if st.button("🔮 Predict"):
+            model = st.session_state.get("best_model")  # ✅ Reload from session
             df_input = pd.DataFrame([input_data])
             pred = model.predict(df_input)[0]
+
             if task_type == "Classification" and label_encoder:
                 label = label_encoder.inverse_transform([pred])[0]
                 st.success(f"Prediction: `{pred}` → **{label}**")
                 df_input["Prediction Label"] = label
             else:
                 st.success(f"Prediction: `{pred}`")
+
             df_input["Prediction"] = pred
             st.dataframe(df_input)
 
+    # ------------------------- BATCH -------------------------
     else:
         st.subheader("📥 Upload Data for Prediction")
         file = st.file_uploader("Upload CSV/XLSX", type=["csv", "xlsx"])
+
         if file:
             new_data = pd.read_csv(file) if file.name.endswith("csv") else pd.read_excel(file)
             if "Unnamed: 0" in new_data.columns:
@@ -1148,17 +1154,27 @@ with tab4:
 
             st.dataframe(new_data.head())
 
-            if all(f in new_data.columns for f in features):
-                if st.button("🔮 Predict on File"):
+            missing = [f for f in features if f not in new_data.columns]
+            if missing:
+                st.error(f"❌ Missing required features: {', '.join(missing)}")
+                st.stop()
+
+            if st.button("🔮 Predict on File"):
+                model = st.session_state.get("best_model")  # ✅ Reload before use
+                try:
                     preds = model.predict(new_data[features])
                     new_data["Prediction"] = preds
+
                     if task_type == "Classification" and label_encoder:
                         new_data["Prediction Label"] = label_encoder.inverse_transform(preds)
-                    st.success("✅ Predictions complete.")
+
+                    st.success("✅ Batch predictions complete.")
                     st.dataframe(new_data)
+
                     st.download_button("📁 Download", new_data.to_csv(index=False), "predictions.csv")
-            else:
-                st.error("❌ Missing required features in uploaded file.")
+
+                except Exception as e:
+                    st.error(f"❌ Prediction failed: {e}")
 
 
 st.markdown(
