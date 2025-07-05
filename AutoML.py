@@ -40,6 +40,7 @@ from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 
+
 # Scikit-learn - Regression Models
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.tree import DecisionTreeRegressor
@@ -69,6 +70,7 @@ from sklearn.preprocessing import (
 from sklearn.utils import resample
 from sklearn.decomposition import PCA
 from sklearn.exceptions import FitFailedWarning
+from sklearn.utils.validation import check_is_fitted
 
 
 import warnings
@@ -1095,126 +1097,66 @@ with tab2:
 
 
 with tab4:
-    st.header("🔮 Prediction on New Data")
+     st.header("🔮 Predict with Trained Model")
 
-    if 'best_model' not in st.session_state or st.session_state.best_model is None:
-        st.warning("⚠️ Please train a model first in the Modeling tab.")
-        st.stop()
-
-    if 'raw_df' not in st.session_state:
-        st.warning("⚠️ No original data found. Please upload a dataset.")
-        st.stop()
-
-    if 'feature_names' in st.session_state:
-        features = st.session_state.feature_names
-    else:
-        st.error("❌ Feature names not found. Please train a model first.")
-        st.stop()
-
-    df_raw = st.session_state.raw_df.copy()
-    model = st.session_state.best_model
-    features = st.session_state.feature_names
+    model = st.session_state.get("best_model", None)
+    features = st.session_state.get("feature_names", [])
+    df_raw = st.session_state.get("raw_df", None)
     task_type = st.session_state.get("task", "Classification")
-    st.write('📌 Best Model:', model.__class__.__name__)
+    label_encoder = st.session_state.get("label_encoder", None)
 
-    st.subheader("📄 Original Data Preview")
-    st.dataframe(df_raw.head(3))
+    if not model or not df_raw or not features:
+        st.error("⚠️ Model or data missing. Please train a model first.")
+        st.stop()
 
-    prediction_mode = st.radio("Choose Prediction Mode:", ["Manual Input", "File Upload (Batch Prediction)"])
+    try:
+        check_is_fitted(model)
+    except Exception:
+        st.error("⚠️ Model is not fitted. Train it first.")
+        st.stop()
 
-    # ------------------------------------------------------
-    # MANUAL INPUT MODE
-    # ------------------------------------------------------
-    if prediction_mode == "Manual Input":
-        st.markdown("### 📝 Enter Feature Values")
+    mode = st.radio("Choose Mode", ["Manual Input", "Batch Prediction via File"])
 
-        if task_type == "Classification":
-            target = st.selectbox("🎯 Select Target Column", [col for col in df_raw.columns if col not in features])
-            st.info(f"📌 Classification Task — Predicting: **{target}**")
-            st.write("Target Values:", df_raw[target].unique())
-            if 'label_encoder' in st.session_state:
-                st.write("🧾 Encoded Classes:", ", ".join(map(str, st.session_state.label_encoder.classes_)))
-
-        else:
-            target = "Target"
-            st.info("📈 Regression Task — Predicting Numeric Value")
-
+    if mode == "Manual Input":
+        st.subheader("📝 Input Feature Values")
         input_data = {}
         for col in features:
-            if col in df_raw.columns:
-                if pd.api.types.is_numeric_dtype(df_raw[col]):
-                    min_, max_ = df_raw[col].min(), df_raw[col].max()
-                    default_val = (min_ + max_) / 2
-                    val = st.text_input(f"{col} (Range: {round(min_,2)}–{round(max_,2)})", value=str(default_val), key=col)
-                    try:
-                        input_data[col] = float(val)
-                    except:
-                        st.warning(f"⚠️ Invalid input for {col}")
-                        st.stop()
-                else:
-                    options = df_raw[col].dropna().unique().tolist()
-                    selected = st.radio(f"{col} (Categorical)", options=options, key=col)
-                    input_data[col] = selected
+            if pd.api.types.is_numeric_dtype(df_raw[col]):
+                val = st.number_input(f"{col}", float(df_raw[col].min()), float(df_raw[col].max()))
             else:
-                st.warning(f"⚠️ Column '{col}' not found in original data.")
-                st.stop()
+                val = st.selectbox(f"{col}", df_raw[col].dropna().unique())
+            input_data[col] = val
 
         if st.button("🔮 Predict"):
-            input_df = pd.DataFrame([input_data])
-            try:
-                pred = model.predict(input_df)
-                if task_type == "Classification" and 'label_encoder' in st.session_state:
-                    output_label = st.session_state.label_encoder.inverse_transform([pred[0]])[0]
-                    st.success(f"✅ Predicted class: `{pred[0]}` → **{output_label}**")
-                    input_df["Prediction"] = pred
-                    input_df["Prediction Label"] = output_label
-                else:
-                    st.success(f"✅ Predicted value: `{pred[0]}`")
-                    input_df["Prediction"] = pred
+            df_input = pd.DataFrame([input_data])
+            pred = model.predict(df_input)[0]
+            if task_type == "Classification" and label_encoder:
+                label = label_encoder.inverse_transform([pred])[0]
+                st.success(f"Prediction: `{pred}` → **{label}**")
+            else:
+                st.success(f"Prediction: `{pred}`")
+            st.dataframe(df_input.assign(Prediction=pred))
 
-                st.dataframe(input_df)
-
-            except Exception as e:
-                st.error(f"❌ Prediction failed: {e}")
-
-    # ------------------------------------------------------
-    # FILE UPLOAD MODE
-    # ------------------------------------------------------
     else:
-        st.markdown("### 📥 Upload New Data for Batch Prediction")
+        st.subheader("📥 Upload Data for Prediction")
+        file = st.file_uploader("Upload CSV/XLSX", type=["csv", "xlsx"])
+        if file:
+            new_data = pd.read_csv(file) if file.name.endswith("csv") else pd.read_excel(file)
+            if "Unnamed: 0" in new_data.columns:
+                new_data.drop(columns=["Unnamed: 0"], inplace=True)
 
-        uploaded_pred_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
-
-        if uploaded_pred_file:
-            try:
-                if uploaded_pred_file.name.endswith(".csv"):
-                    new_data = pd.read_csv(uploaded_pred_file)
-                else:
-                    new_data = pd.read_excel(uploaded_pred_file)
-                if "Unnamed: 0" in new_data.columns:
-                    new_data=new_data.drop(columns=['Unnamed: 0'])
-                st.write("📄 Preview of Uploaded Data:")
-                st.dataframe(new_data.head())
-
-                if st.button("🔮 Predict on Uploaded Data"):
+            st.dataframe(new_data.head())
+            if all(f in new_data.columns for f in features):
+                if st.button("🔮 Predict on File"):
                     preds = model.predict(new_data[features])
                     new_data["Prediction"] = preds
-
-                    if task_type == "Classification" and 'label_encoder' in st.session_state:
-                        new_data["Prediction Label"] = st.session_state.label_encoder.inverse_transform(preds)
-
-                    st.success("✅ Batch predictions complete.")
+                    if task_type == "Classification" and label_encoder:
+                        new_data["Prediction Label"] = label_encoder.inverse_transform(preds)
+                    st.success("✅ Done!")
                     st.dataframe(new_data)
-
-                    # Download CSV
-                    csv = new_data.to_csv(index=False).encode('utf-8')
-                    st.download_button("📁 Download Predictions", csv, "predictions.csv", "text/csv")
-
-            except Exception as e:
-                st.error(f"❌ Prediction failed: {e}")
-
-
-
+                    st.download_button("📁 Download", new_data.to_csv(index=False), "predictions.csv")
+            else:
+                st.error("Missing required features.")
 
 
 st.markdown(
