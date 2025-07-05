@@ -391,13 +391,13 @@ def eda(data):
     sns.barplot(df,ax=ax)
     st.pyplot(fig)
 
-    with col1:
-        st.write("📄 Raw Data")
-        st.write(data)
-        buffer = io.StringIO()
-        df.info(buf=buffer)
-        info_string = buffer.getvalue()
-        st.code(info_string)
+    
+    st.write("📄 Raw Data")
+    st.write(data)
+    buffer = io.StringIO()
+    df.info(buf=buffer)
+    info_string = buffer.getvalue()
+    st.code(info_string)
 
     st.write("📊Data Description")
     st.write(df.describe())
