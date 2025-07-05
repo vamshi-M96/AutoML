@@ -76,21 +76,12 @@ warnings.filterwarnings("ignore")
 
 st.set_page_config(page_title="AutoML Studio", layout="wide")
 
-st.markdown(
-    """
-    <h1 style='text-align: center;'>
-        🤖 AutoML Studio
-        <span style='font-size: 32px; color: blue;'> – Train, Tune & Predict with Ease</span>
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
 
 st.markdown(
     """
     <h1 style='text-align: center;'>
         🤖 AutoML Studio
-        <span style='font-size: 16px; color: gray;'> – Train, Tune & Predict with Ease</span>
+        <span style='font-size: 30px; color: gray;'> – Train, Tune & Predict with Ease</span>
     </h1>
     <h4 style='text-align: center; font-weight: normal; margin-top: -10px;'>📈 Classification &nbsp;&nbsp;|&nbsp;&nbsp; 📉 Regression</h4>
     <hr style='margin-top: 10px; margin-bottom: 20px;'>
@@ -98,7 +89,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown("<h3 style='text-align: center;'>📈Classification & 📉Regression</h3>", unsafe_allow_html=True)
 
 
 #data= st.file_uploader("upload file",type=['csv','xlsx'])
