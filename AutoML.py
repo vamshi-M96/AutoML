@@ -82,20 +82,8 @@ st.markdown(
     <p style='text-align: center; font-size:16px; color: gray; margin-top: -10px;'>
         Build & Deploy ML Models – Fast, Smart, No Code
     </p>
-    <h4 style='text-align: center; color: #4a4a4a;'>📈 Classification &nbsp;&nbsp;|&nbsp;&nbsp; 📉 Regression</h4>
+    <h4 style='text-align: center; color: white;'>📈 Classification &nbsp;&nbsp;|&nbsp;&nbsp; 📉 Regression</h4>
     <hr style='margin-top: 10px; margin-bottom: 20px;'>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
-    <h1 style='text-align: center;'>🤖 AutoML Studio</h1>
-    <p style='text-align: center; font-size:16px; color: gray;'>
-        Train 🧠 • Tune 🧬 • Predict 🎯
-    </p>
-    <h4 style='text-align: center; color: white;'>📈 Classification | 📉 Regression</h4>
-    <hr>
     """,
     unsafe_allow_html=True
 )
