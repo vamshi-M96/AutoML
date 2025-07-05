@@ -1105,7 +1105,6 @@ with tab4:
     label_encoder = st.session_state.get("label_encoder", None)
 
     if model is None or df_raw is None or not features:
-:
         st.error("⚠️ Model or data missing. Please train a model first.")
         st.stop()
 
