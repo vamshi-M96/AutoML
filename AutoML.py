@@ -386,10 +386,7 @@ def eda(data):
 
     df=data.copy()
 
-    st.sidebar.subheader("Additional EDA process")  
-    fig, ax = plt.subplots()
-    sns.barplot(df,ax=ax)
-    st.pyplot(fig)
+
 
     
     st.write("📄 Raw Data")
@@ -398,6 +395,11 @@ def eda(data):
     df.info(buf=buffer)
     info_string = buffer.getvalue()
     st.code(info_string)
+
+    st.sidebar.subheader("Additional EDA process")  
+    fig, ax = plt.subplots()
+    sns.barplot(df,ax=ax)
+    st.pyplot(fig)
 
     st.write("📊Data Description")
     st.write(df.describe())
