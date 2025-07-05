@@ -1110,32 +1110,32 @@ with tab4:
     task_type = st.session_state.get("task", "Classification")
 
     st.write(model)
-       non_feature_cols = [col for col in df.columns if col not in features]
-        if non_feature_cols:
-            target = st.selectbox("Select the target column (if available):", non_feature_cols)
-        else:
-            target = st.text_input("Enter the name of the target column:", value="Target")
-    
-    
-        st.info(f"🎯 Predicting: {target}")
-    
-        input_data = {}
-        for col in features:
-            min_, max_ = (0, 100)
-            if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
-                min_, max_ = df[col].min(), df[col].max()
-    
-            val = st.text_input(f"{col} (min: {min_}, max: {max_})", key=col)
-            try:
-                input_data[col] = float(val)
-            except:
-                st.warning(f"Invalid input for {col}")
-                st.stop()
-    
-        if st.button("Predict"):
-            pred = model.predict(pd.DataFrame([input_data]))
-            st.success(f"✅ Predicted value of **{target}**: {pred[0]}")
-    
+    non_feature_cols = [col for col in df.columns if col not in features]
+    if non_feature_cols:
+        target = st.selectbox("Select the target column (if available):", non_feature_cols)
+    else:
+        target = st.text_input("Enter the name of the target column:", value="Target")
+
+
+    st.info(f"🎯 Predicting: {target}")
+
+    input_data = {}
+    for col in features:
+        min_, max_ = (0, 100)
+        if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
+            min_, max_ = df[col].min(), df[col].max()
+
+        val = st.text_input(f"{col} (min: {min_}, max: {max_})", key=col)
+        try:
+            input_data[col] = float(val)
+        except:
+            st.warning(f"Invalid input for {col}")
+            st.stop()
+
+    if st.button("Predict"):
+        pred = model.predict(pd.DataFrame([input_data]))
+        st.success(f"✅ Predicted value of **{target}**: {pred[0]}")
+
 
 
 st.markdown(
