@@ -774,7 +774,7 @@ def classification(x,y):
 
     
         time_taken = end_time-start_time
-        st.session_state.label_encoder = leyes
+        st.session_state.label_encoder = le
         
         st.success(f"Task complited in {time_taken:.2f} seconds")
 
