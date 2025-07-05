@@ -1099,7 +1099,7 @@ from sklearn.utils.validation import check_is_fitted
 
 with tab4:
     st.header("🔮 Predict with Trained Model")
-    st.write(st.session_state.feature_names)
+    
     model = st.session_state.best_model
     features = st.session_state.feature_names
     df_raw = st.session_state.raw_df.copy()
