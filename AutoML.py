@@ -774,7 +774,8 @@ def classification(x,y):
 
     
         time_taken = end_time-start_time
-
+        st.session_state.label_encoder = leyes
+        
         st.success(f"Task complited in {time_taken:.2f} seconds")
 
         
@@ -1112,6 +1113,7 @@ with tab4:
 
     df_raw = st.session_state.raw_df.copy()
     model = st.session_state.best_model
+    features = st.session_state.feature_names
     task_type = st.session_state.get("task", "Classification")
     st.write('📌 Best Model:', model.__class__.__name__)
 
