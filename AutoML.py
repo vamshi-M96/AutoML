@@ -1094,7 +1094,7 @@ with tab2:
 
 
 with tab4:
-    st.header("🔮 Prediction")
+    st.header("🔮 Prediction on New Data")
 
     if 'best_model' not in st.session_state or st.session_state.best_model is None:
         st.warning("⚠️ Please train a model first in the Modeling tab.")
@@ -1113,23 +1113,28 @@ with tab4:
     df_raw = st.session_state.raw_df.copy()
     model = st.session_state.best_model
     task_type = st.session_state.get("task", "Classification")
+    st.write('📌 Best Model:', model.__class__.__name__)
 
-    # Choose prediction mode
-    mode = st.radio("Choose Prediction Mode:", ["🔘 Single Row Input", "📁 File Upload (Batch Prediction)"])
+    st.subheader("📄 Original Data Preview")
+    st.dataframe(df_raw.head(3))
 
-    # ---------- Single Row Manual Input ----------
-    if mode == "🔘 Single Row Input":
-        st.subheader("🧍 Manual Input")
+    prediction_mode = st.radio("Choose Prediction Mode:", ["Manual Input", "File Upload (Batch Prediction)"])
+
+    # ------------------------------------------------------
+    # MANUAL INPUT MODE
+    # ------------------------------------------------------
+    if prediction_mode == "Manual Input":
+        st.markdown("### 📝 Enter Feature Values")
 
         if task_type == "Classification":
             target = st.selectbox("🎯 Select Target Column", [col for col in df_raw.columns if col not in features])
-            st.info(f"🎯 Classification task — predicting: **{target}**")
-            st.write("Target values:", df_raw[target].unique())
+            st.info(f"📌 Classification Task — Predicting: **{target}**")
+            st.write("Target Values:", df_raw[target].unique())
             if 'label_encoder' in st.session_state:
-                class_labels = st.session_state.label_encoder.classes_
-                st.write("🧾 Possible categories:", ", ".join(map(str, class_labels)))
+                st.write("🧾 Encoded Classes:", ", ".join(st.session_state.label_encoder.classes_))
         else:
-            st.info("📈 Regression task — predicting numeric outcome")
+            target = "Target"
+            st.info("📈 Regression Task — Predicting Numeric Value")
 
         input_data = {}
         for col in features:
@@ -1148,166 +1153,61 @@ with tab4:
                     selected = st.radio(f"{col} (Categorical)", options=options, key=col)
                     input_data[col] = selected
             else:
-                st.warning(f"⚠️ Column '{col}' not found in raw data.")
+                st.warning(f"⚠️ Column '{col}' not found in original data.")
                 st.stop()
 
         if st.button("🔮 Predict"):
             input_df = pd.DataFrame([input_data])
             try:
                 pred = model.predict(input_df)
-                st.success(f"✅ Predicted value: `{pred[0]}`")
-
                 if task_type == "Classification" and 'label_encoder' in st.session_state:
-                    label_encoder = st.session_state.label_encoder
-                    decoded = label_encoder.inverse_transform(pred)
-                    input_df["Predicted"] = decoded
-                    st.dataframe(input_df)
-                else:
+                    output_label = st.session_state.label_encoder.inverse_transform([pred[0]])[0]
+                    st.success(f"✅ Predicted class: `{pred[0]}` → **{output_label}**")
                     input_df["Prediction"] = pred
-                    st.dataframe(input_df)
+                    input_df["Prediction Label"] = output_label
+                else:
+                    st.success(f"✅ Predicted value: `{pred[0]}`")
+                    input_df["Prediction"] = pred
+
+                st.dataframe(input_df)
+
             except Exception as e:
                 st.error(f"❌ Prediction failed: {e}")
 
-    # ---------- Batch File Upload Prediction ----------
-    elif mode == "📁 File Upload (Batch Prediction)":
-        st.subheader("📁 Upload File for Batch Prediction")
-        uploaded_pred_file = st.file_uploader("Upload CSV or Excel file", type=["csv", "xlsx"])
-
-        if uploaded_pred_file:
-            if uploaded_pred_file.name.endswith(".csv"):
-                new_data = pd.read_csv(uploaded_pred_file)
-            else:
-                new_data = pd.read_excel(uploaded_pred_file)
-            
-            if "Unnamed: 0" in new_data.columns:
-                new_data=new_data.drop(columns=['Unnamed: 0'])
-
-            st.write("📄 Uploaded Data Preview:")
-            st.dataframe(new_data.head())
-
-            if st.button("🔮 Predict on File"):
-                try:
-                    preds = model.predict(new_data[features])
-                    new_data["Prediction"] = preds
-
-                    if task_type == "Classification" and 'label_encoder' in st.session_state:
-                        label_encoder = st.session_state.label_encoder
-                        new_data["Prediction_Label"] = label_encoder.inverse_transform(preds)
-
-                    st.success("✅ Batch predictions complete.")
-                    st.dataframe(new_data)
-
-                    csv = new_data.to_csv(index=False).encode('utf-8')
-                    st.download_button("📥 Download Predictions", csv, "predictions.csv", "text/csv")
-                except Exception as e:
-                    st.error(f"❌ Batch prediction failed: {e}")with tab4:
-    st.header("🔮 Prediction")
-
-    if 'best_model' not in st.session_state or st.session_state.best_model is None:
-        st.warning("⚠️ Please train a model first in the Modeling tab.")
-        st.stop()
-
-    if 'raw_df' not in st.session_state:
-        st.warning("⚠️ No original data found. Please upload a dataset.")
-        st.stop()
-
-    if 'feature_names' in st.session_state:
-        features = st.session_state.feature_names
+    # ------------------------------------------------------
+    # FILE UPLOAD MODE
+    # ------------------------------------------------------
     else:
-        st.error("❌ Feature names not found. Please train a model first.")
-        st.stop()
+        st.markdown("### 📥 Upload New Data for Batch Prediction")
 
-    df_raw = st.session_state.raw_df.copy()
-    model = st.session_state.best_model
-    task_type = st.session_state.get("task", "Classification")
-
-    # Choose prediction mode
-    mode = st.radio("Choose Prediction Mode:", ["🔘 Single Row Input", "📁 File Upload (Batch Prediction)"])
-
-    # ---------- Single Row Manual Input ----------
-    if mode == "🔘 Single Row Input":
-        st.subheader("🧍 Manual Input")
-
-        if task_type == "Classification":
-            target = st.selectbox("🎯 Select Target Column", [col for col in df_raw.columns if col not in features])
-            st.info(f"🎯 Classification task — predicting: **{target}**")
-            st.write("Target values:", df_raw[target].unique())
-            if 'label_encoder' in st.session_state:
-                class_labels = st.session_state.label_encoder.classes_
-                st.write("🧾 Possible categories:", ", ".join(map(str, class_labels)))
-        else:
-            st.info("📈 Regression task — predicting numeric outcome")
-
-        input_data = {}
-        for col in features:
-            if col in df_raw.columns:
-                if pd.api.types.is_numeric_dtype(df_raw[col]):
-                    min_, max_ = df_raw[col].min(), df_raw[col].max()
-                    default_val = (min_ + max_) / 2
-                    val = st.text_input(f"{col} (Range: {round(min_,2)}–{round(max_,2)})", value=str(default_val), key=col)
-                    try:
-                        input_data[col] = float(val)
-                    except:
-                        st.warning(f"⚠️ Invalid input for {col}")
-                        st.stop()
-                else:
-                    options = df_raw[col].dropna().unique().tolist()
-                    selected = st.radio(f"{col} (Categorical)", options=options, key=col)
-                    input_data[col] = selected
-            else:
-                st.warning(f"⚠️ Column '{col}' not found in raw data.")
-                st.stop()
-
-        if st.button("🔮 Predict"):
-            input_df = pd.DataFrame([input_data])
-            try:
-                pred = model.predict(input_df)
-                st.success(f"✅ Predicted value: `{pred[0]}`")
-
-                if task_type == "Classification" and 'label_encoder' in st.session_state:
-                    label_encoder = st.session_state.label_encoder
-                    decoded = label_encoder.inverse_transform(pred)
-                    input_df["Predicted"] = decoded
-                    st.dataframe(input_df)
-                else:
-                    input_df["Prediction"] = pred
-                    st.dataframe(input_df)
-            except Exception as e:
-                st.error(f"❌ Prediction failed: {e}")
-
-    # ---------- Batch File Upload Prediction ----------
-    elif mode == "📁 File Upload (Batch Prediction)":
-        st.subheader("📁 Upload File for Batch Prediction")
-        uploaded_pred_file = st.file_uploader("Upload CSV or Excel file", type=["csv", "xlsx"])
+        uploaded_pred_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
 
         if uploaded_pred_file:
-            if uploaded_pred_file.name.endswith(".csv"):
-                new_data = pd.read_csv(uploaded_pred_file)
-            else:
-                new_data = pd.read_excel(uploaded_pred_file)
-            
-            if "Unnamed: 0" in new_data.columns:
-                new_data=new_data.drop(columns=['Unnamed: 0'])
+            try:
+                if uploaded_pred_file.name.endswith(".csv"):
+                    new_data = pd.read_csv(uploaded_pred_file)
+                else:
+                    new_data = pd.read_excel(uploaded_pred_file)
 
-            st.write("📄 Uploaded Data Preview:")
-            st.dataframe(new_data.head())
+                st.write("📄 Preview of Uploaded Data:")
+                st.dataframe(new_data.head())
 
-            if st.button("🔮 Predict on File"):
-                try:
+                if st.button("🔮 Predict on Uploaded Data"):
                     preds = model.predict(new_data[features])
                     new_data["Prediction"] = preds
 
                     if task_type == "Classification" and 'label_encoder' in st.session_state:
-                        label_encoder = st.session_state.label_encoder
-                        new_data["Prediction_Label"] = label_encoder.inverse_transform(preds)
+                        new_data["Prediction Label"] = st.session_state.label_encoder.inverse_transform(preds)
 
                     st.success("✅ Batch predictions complete.")
                     st.dataframe(new_data)
 
+                    # Download CSV
                     csv = new_data.to_csv(index=False).encode('utf-8')
-                    st.download_button("📥 Download Predictions", csv, "predictions.csv", "text/csv")
-                except Exception as e:
-                    st.error(f"❌ Batch prediction failed: {e}")
+                    st.download_button("📁 Download Predictions", csv, "predictions.csv", "text/csv")
+
+            except Exception as e:
+                st.error(f"❌ Prediction failed: {e}")
 
 
 
