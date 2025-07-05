@@ -80,7 +80,7 @@ st.markdown(
     """
     <h1 style='text-align: center;'>
         🤖 AutoML Studio
-        <span style='font-size: 32px; color: gray;'> – Train, Tune & Predict with Ease</span>
+        <span style='font-size: 32px; color: blue;'> – Train, Tune & Predict with Ease</span>
     </h1>
     """,
     unsafe_allow_html=True
