@@ -1095,6 +1095,8 @@ with tab2:
 
 
 
+from sklearn.utils.validation import check_is_fitted
+
 with tab4:
     st.header("🔮 Predict with Trained Model")
 
@@ -1175,6 +1177,7 @@ with tab4:
 
                 except Exception as e:
                     st.error(f"❌ Prediction failed: {e}")
+
 
 
 st.markdown(
