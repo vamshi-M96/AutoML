@@ -1133,7 +1133,8 @@ with tab4:
             st.info(f"📌 Classification Task — Predicting: **{target}**")
             st.write("Target Values:", df_raw[target].unique())
             if 'label_encoder' in st.session_state:
-                st.write("🧾 Encoded Classes:", ", ".join(st.session_state.label_encoder.classes_))
+                st.write("🧾 Encoded Classes:", ", ".join(map(str, st.session_state.label_encoder.classes_)))
+
         else:
             target = "Target"
             st.info("📈 Regression Task — Predicting Numeric Value")
