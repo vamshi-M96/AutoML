@@ -79,16 +79,15 @@ st.set_page_config(page_title="AutoML Studio", layout="wide")
 
 st.markdown(
     """
-    <h1 style='text-align: center;'>
-        🤖 AutoML Studio
-        <span style='font-size: 30px; color: gray;'> – 🧠Train, 🧬Tune & 🔮Predict with Ease</span>
-    </h1>
-    <h4 style='text-align: center; font-weight: normal; margin-top: -10px;'>📈 Classification &nbsp;&nbsp;|&nbsp;&nbsp; 📉 Regression</h4>
-    <hr style='margin-top: 10px; margin-bottom: 20px;'>
+    <h1 style='text-align: center;'>🤖 AutoML Studio</h1>
+    <p style='text-align: center; font-size:16px; color: gray;'>
+        Train 🧠 • Tune 🧬 • Predict 🎯
+    </p>
+    <h4 style='text-align: center; color: #4a4a4a;'>📈 Classification | 📉 Regression</h4>
+    <hr>
     """,
     unsafe_allow_html=True
 )
-
 
 
 #data= st.file_uploader("upload file",type=['csv','xlsx'])
