@@ -83,7 +83,7 @@ st.markdown(
     <p style='text-align: center; font-size:16px; color: gray;'>
         Train 🧠 • Tune 🧬 • Predict 🎯
     </p>
-    <h4 style='text-align: center; color: #4a4a4a;'>📈 Classification | 📉 Regression</h4>
+    <h4 style='text-align: center; color: white;'>📈 Classification | 📉 Regression</h4>
     <hr>
     """,
     unsafe_allow_html=True
