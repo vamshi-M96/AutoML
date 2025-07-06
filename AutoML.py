@@ -1162,19 +1162,29 @@ with tab4:
             input_df = pd.DataFrame([input_data])
             try:
                 check_is_fitted(model)
+        
+                # ✅ Use saved label encoders from session state
+                if 'label_encoders' in st.session_state:
+                    for col, le in st.session_state.label_encoders.items():
+                        if col in input_df.columns:
+                            input_df[col] = le.transform([input_df[col][0]])
+        
                 prediction_encoded = model.predict(input_df)[0]
-
+        
+                # ✅ Decode target if label_encoder exists
                 if 'label_encoder' in st.session_state:
                     prediction = st.session_state.label_encoder.inverse_transform([prediction_encoded])[0]
                 else:
                     prediction = prediction_encoded
-                    
+        
                 st.success(f"✅ Prediction: {prediction}")
                 st.dataframe(input_df.assign(Prediction=[prediction]))
+        
             except NotFittedError:
                 st.error("❌ Model not trained. Please train it before prediction.")
             except Exception as e:
                 st.error(f"🚫 Prediction error: {e}")
+
 
     def batch_file_prediction(model):
         st.subheader("📂 Batch Prediction from CSV")
@@ -1184,47 +1194,54 @@ with tab4:
         if uploaded_file:
             try:
                 batch_df = pd.read_csv(uploaded_file)
-
-                # ✅ Drop Unnamed column (fix typo + use inplace)
+        
+                # ✅ Drop Unnamed column
                 if 'Unnamed: 0' in batch_df.columns:
                     batch_df.drop(columns=['Unnamed: 0'], inplace=True)
-
+        
                 st.write("📊 Uploaded Data Preview:")
                 st.dataframe(batch_df.head())
-
+        
                 if st.button("🔮 Predict Batch"):
                     try:
                         check_is_fitted(model)
-
-                        # ✅ Align features to model's training features
+        
+                        # ✅ Encode categorical columns using saved encoders
+                        if 'label_encoders' in st.session_state:
+                            for col, le in st.session_state.label_encoders.items():
+                                if col in batch_df.columns:
+                                    batch_df[col] = le.transform(batch_df[col].astype(str))
+        
+                        # ✅ Align with model's features
                         if hasattr(model, "feature_names_in_"):
                             expected_features = model.feature_names_in_
                             batch_df = batch_df[[col for col in expected_features if col in batch_df.columns]]
-
+        
                         target = st.session_state.target
-
-
+        
+                        # ✅ Predict
                         predictions = model.predict(batch_df)
-
-                # ✅ Decode prediction if label encoder exists
+        
+                        # ✅ Decode prediction if label encoder exists
                         if 'label_encoder' in st.session_state:
                             predictions = st.session_state.label_encoder.inverse_transform(predictions)
-                        
+        
                         batch_df[f"Pred {target}"] = predictions
-
+        
                         st.success("✅ Batch predictions done!")
                         st.dataframe(batch_df)
-
+        
                         csv = batch_df.to_csv(index=False).encode()
                         st.download_button("📥 Download Predictions", data=csv, file_name="batch_predictions.csv", mime="text/csv")
-
+        
                     except NotFittedError:
                         st.error("❌ The model is not trained yet.")
                     except Exception as e:
                         st.error(f"🚫 Prediction error: {e}")
-
+        
             except Exception as e:
                 st.error(f"🚫 File Read Error: {e}")
+
 
 
     def predict_with_best_model():
