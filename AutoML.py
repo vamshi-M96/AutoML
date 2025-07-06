@@ -1099,43 +1099,145 @@ with tab2:
 from sklearn.utils.validation import check_is_fitted
 
 with tab4:
-    st.header("🔮 Predict with Trained Model")
-    
-    model = st.session_state.best_model
-    if "feature_names" not in st.session_state:
-        st.error("⚠️ Feature names not found. Please train a model first.")
+   st.header("🔮 Predict with Trained Model")
+
+    # Check required session variables
+    if not all(k in st.session_state for k in ["df", "target", "best_model"]):
+        st.error("⚠️ Missing data or model. Please train first.")
         st.stop()
 
-    features = st.session_state.feature_names
-    df_raw = st.session_state.raw_df.copy()
-    task_type = st.session_state.get("task", "Classification")
-
-    st.write(model)
-    non_feature_cols = [col for col in df.columns if col not in features]
-    if non_feature_cols:
-        target = st.selectbox("Select the target column (if available):", non_feature_cols)
-    else:
-        target = st.text_input("Enter the name of the target column:", value="Target")
+    # Load data and refit model
+    df = st.session_state.df
+    target = st.session_state.target
 
 
-    st.info(f"🎯 Predicting: {target}")
 
-    input_data = {}
-    for col in features:
-        min_, max_ = (0, 100)
-        if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
-            min_, max_ = df[col].min(), df[col].max()
+    def manual_input_prediction(model):
+        st.subheader("📝 Manual Input for Prediction")
 
-        val = st.text_input(f"{col} (min: {min_}, max: {max_})", key=col)
-        try:
-            input_data[col] = float(val)
-        except:
-            st.warning(f"Invalid input for {col}")
-            
 
-    if st.button("Predict"):
-        pred = model.predict(pd.DataFrame([input_data]))
-        st.success(f"✅ Predicted value of **{target}**: {pred[0]}")
+
+        if "raw_df" not in st.session_state or "target" not in st.session_state:
+            st.error("❌ Missing raw dataset or target variable. Please load data and train a model first.")
+            return
+
+        df_raw = st.session_state.raw_df
+        target = st.session_state.target
+
+        if target not in df_raw.columns:
+            st.error("❌ Target column not found in the uploaded dataset.")
+            return
+
+        x = df_raw.drop(columns=[target])  # Use only input features
+
+
+        # Use a form to group all input fields together
+        with st.form("manual_input_form"):
+            input_data = {}
+            for col in x.columns:
+                if x[col].dtype == "object" or x[col].dtype.name == "category":
+                    options = x[col].dropna().unique().tolist()
+                    input_data[col] = st.selectbox(f"{col}", options, key=col)
+                else:
+                    input_data[col] = st.number_input(f"{col}", value=float(x[col].mean()), key=col)
+
+            submitted = st.form_submit_button("🔮 Predict")
+
+        if submitted:
+            input_df = pd.DataFrame([input_data])
+            try:
+                check_is_fitted(model)
+                prediction = model.predict(input_df)[0]
+
+                if 'label_encoder' in st.session_state:
+                    prediction = st.session_state.label_encoder.inverse_transform([prediction_encoded])[0]
+                else:
+                    prediction = prediction_encoded
+                    
+                st.success(f"✅ Prediction: {prediction}")
+                st.dataframe(input_df.assign(Prediction=[prediction]))
+            except NotFittedError:
+                st.error("❌ Model not trained. Please train it before prediction.")
+            except Exception as e:
+                st.error(f"🚫 Prediction error: {e}")
+
+    def batch_file_prediction(model):
+        st.subheader("📂 Batch Prediction from CSV")
+
+        uploaded_file = st.file_uploader("Upload a CSV file with the same feature columns", type=["csv"])
+
+        if uploaded_file:
+            try:
+                batch_df = pd.read_csv(uploaded_file)
+
+                # ✅ Drop Unnamed column (fix typo + use inplace)
+                if 'Unnamed: 0' in batch_df.columns:
+                    batch_df.drop(columns=['Unnamed: 0'], inplace=True)
+
+                st.write("📊 Uploaded Data Preview:")
+                st.dataframe(batch_df.head())
+
+                if st.button("🔮 Predict Batch"):
+                    try:
+                        check_is_fitted(model)
+
+                        # ✅ Align features to model's training features
+                        if hasattr(model, "feature_names_in_"):
+                            expected_features = model.feature_names_in_
+                            batch_df = batch_df[[col for col in expected_features if col in batch_df.columns]]
+
+                        target = st.session_state.target
+
+
+                        predictions = model.predict(batch_df)
+
+                # ✅ Decode prediction if label encoder exists
+                        if 'label_encoder' in st.session_state:
+                            predictions = st.session_state.label_encoder.inverse_transform(predictions)
+                        
+                        batch_df[f"Pred {target}"] = predictions
+
+                        st.success("✅ Batch predictions done!")
+                        st.dataframe(batch_df)
+
+                        csv = batch_df.to_csv(index=False).encode()
+                        st.download_button("📥 Download Predictions", data=csv, file_name="batch_predictions.csv", mime="text/csv")
+
+                    except NotFittedError:
+                        st.error("❌ The model is not trained yet.")
+                    except Exception as e:
+                        st.error(f"🚫 Prediction error: {e}")
+
+            except Exception as e:
+                st.error(f"🚫 File Read Error: {e}")
+
+
+    def predict_with_best_model():
+        st.header("🔮 Predict with Trained Model")
+
+        # Improved session check to prevent NoneType errors
+        if not all(
+            k in st.session_state and st.session_state[k] is not None
+            for k in ["df", "target", "best_model"]
+        ):
+            st.warning("⚠️ Please upload data and train a model first.")
+            return
+
+        df = st.session_state.df
+        target = st.session_state.target
+        model = st.session_state.best_model
+        X = df.drop(columns=[target])
+
+        st.subheader("📄 Choose Input Type")
+        input_type = st.radio("Select input type:", ["📄 Manual Input", "📂 Upload Batch File"])
+
+        if input_type == "📄 Manual Input":
+            manual_input_prediction(model)
+        else:
+            batch_file_prediction(model)
+
+    predict_with_best_model()
+  
 
 
 
