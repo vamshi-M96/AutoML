@@ -746,7 +746,7 @@ def classification(x,y):
 ## DOWNLOAD OF DIFFRENT MODELS
         st.sidebar.header('Download required model for Deployment')
         for model_name in data.index:
-        model = data.loc[model_name, "Model"]
+            model = data.loc[model_name, "Model"]
         
         # Optional: include features used during training
         # model = {"model": model, "features": feature_list}
