@@ -470,13 +470,19 @@ def eda(data):
     
     split(df)
 
-
-    if st.button('Report'):
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
-            report = sv.analyze(df)
-            report.show_html(f.name)
-            st.components.v1.html(open(f.name, 'r', encoding='utf-8').read(), height=1000, scrolling=True)
-
+    # ✅ Patch Sweetviz + NumPy compatibility issue
+    if not hasattr(np, "VisibleDeprecationWarning"):
+        np.VisibleDeprecationWarning = DeprecationWarning
+    
+    # Inside your Streamlit app logic:
+    if st.button('📊 Generate Sweetviz Report'):
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+                report = sv.analyze(df)
+                report.show_html(f.name)
+                st.components.v1.html(open(f.name, 'r', encoding='utf-8').read(), height=1000, scrolling=True)
+        except Exception as e:
+            st.error(f"❌ Failed to generate Sweetviz report:\n\n{e}")
 
     return df
 
