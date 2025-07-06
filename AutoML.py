@@ -546,6 +546,8 @@ def classification(x,y):
         grid_rfc = GridSearchCV(estimator=model_rfc, param_grid=param_grid)
         grid_rfc.fit(train_x, train_y)
 
+        best_model = grid_rfc.best_estimator_
+
         RFC_Model = RandomForestClassifier(n_estimators=grid_rfc.best_params_['n_estimators'],max_features=grid_rfc.best_params_['max_features'])
         RFC_Model.fit(train_x,train_y)
 
@@ -555,7 +557,7 @@ def classification(x,y):
         rfc_train_acc = accuracy_score(train_y,RFC_train_predict)*100
         rfc_test_acc = accuracy_score(test_y,RFC_test_predict)*100
 
-        return rfc_train_acc,rfc_test_acc, model_rfc
+        return rfc_train_acc,rfc_test_acc, best_model
 
     #support vector clasifer
 
