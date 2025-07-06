@@ -746,23 +746,19 @@ def classification(x,y):
 ## DOWNLOAD OF DIFFRENT MODELS
         st.sidebar.header('Download required model for Deployment')
         for model_name in data.index:
-            model = data.loc[model_name, "Model"]
-        
-        # Optional: include features used during training
-        # model = {"model": model, "features": feature_list}
-    
-        buffer = io.BytesIO()
-        pickle.dump(model, buffer)
-        buffer.seek(0)
-    
-        st.sidebar.download_button(
-            label=f"📥 Download {model_name} Model",
-            data=buffer,
-            file_name=f"{model_name.replace(' ', '_').lower()}_model.pkl",
-            mime="application/octet-stream",
-            key=f"download_{model_name}"
-        )
+            model = data.loc[model_name, 'Model']
+            file_name = f"{model_name}_model.pkl"
+            with open(file_name, "wb") as f:
+                pickle.dump(model, f) 
 
+            with open(file_name, "rb") as f:
+                
+                st.sidebar.download_button(
+                    label=f"📥 Download {model_name.capitalize()} Model",
+                    data=f.read(),
+                    file_name=file_name,
+                    mime="application/octet-stream",key=f"download_{model_name}"
+                ) 
 
 # 🎯 Simple Best Classification Model Selector
         st.subheader("Best Classification Model")
