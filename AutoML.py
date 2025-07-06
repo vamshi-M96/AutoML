@@ -1099,7 +1099,8 @@ with tab2:
 from sklearn.utils.validation import check_is_fitted
 
 with tab4:
-   st.header("🔮 Predict with Trained Model")
+    
+    st.header("🔮 Predict with Trained Model")
 
     # Check required session variables
     if not all(k in st.session_state for k in ["df", "target", "best_model"]):
@@ -1237,6 +1238,7 @@ with tab4:
             batch_file_prediction(model)
 
     predict_with_best_model()
+ 
   
 
 
