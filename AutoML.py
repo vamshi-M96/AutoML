@@ -1151,7 +1151,7 @@ with tab4:
             input_data[col] = float(val)
         except:
             st.warning(f"Invalid input for {col}")
-            st.stop()
+            
 
     if st.button("Predict"):
         pred = model.predict(pd.DataFrame([input_data]))
