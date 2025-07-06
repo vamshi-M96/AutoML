@@ -762,25 +762,7 @@ def classification(x,y):
             mime="application/octet-stream",
             key=f"download_{model_name}"
         )
-'''        for model_name in data.index:
-            model = data.loc[model_name, 'Model']
 
-            buffer = io.BytesIO()
-            pickle.dump(model, buffer)
-            buffer.seek(0)
-            file_name = f"{model_name}_model.pkl"
-            with open(file_name, "wb") as f:
-                pickle.dump(model, f) 
-
-            with open(file_name, "rb") as f:
-                
-                st.sidebar.download_button(
-                    label=f"📥 Download {model_name.capitalize()} Model",
-                    data=f.read(),
-                    file_name=file_name,
-                    mime="application/octet-stream",key=f"download_{model_name}"
-                ) 
-'''
 
 # 🎯 Simple Best Classification Model Selector
         st.subheader("Best Classification Model")
