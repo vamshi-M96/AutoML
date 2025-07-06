@@ -163,7 +163,7 @@ def eda(data):
 
         return d
 #Datatypes
-    def change_column_dtype_per_column(df, key_prefix=""):
+    def change_column_dtype(df, key_prefix=""):
         st.sidebar.markdown("### 🔄 Change Dtype Per Column")
     
         # Step 1: Select multiple columns
