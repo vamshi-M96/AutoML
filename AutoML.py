@@ -131,13 +131,17 @@ def eda(data):
 
     #Label Encoding
     def labelencoding(d):
-        le = LabelEncoder()
-
-        for i in d.select_dtypes(['object']).columns:
-            d[i]=le.fit_transform(d[i].astype(str))
-
+        label_encoders = {}
+    
+        for col in d.select_dtypes(include='object').columns:
+            le = LabelEncoder()
+            d[col] = le.fit_transform(d[col].astype(str))
+            label_encoders[col] = le  # store encoder per column
+    
+        st.session_state.label_encoders = label_encoders  # ✅ store in session state
         st.success("✅ Label encoding applied to object columns")
         return d
+
 
     # Rename columns
     def rename(d):
@@ -1194,51 +1198,67 @@ with tab4:
         if uploaded_file:
             try:
                 batch_df = pd.read_csv(uploaded_file)
-        
+
                 # ✅ Drop Unnamed column
                 if 'Unnamed: 0' in batch_df.columns:
                     batch_df.drop(columns=['Unnamed: 0'], inplace=True)
-        
+
                 st.write("📊 Uploaded Data Preview:")
                 st.dataframe(batch_df.head())
-        
+
                 if st.button("🔮 Predict Batch"):
                     try:
                         check_is_fitted(model)
-        
+
                         # ✅ Encode categorical columns using saved encoders
                         if 'label_encoders' in st.session_state:
                             for col, le in st.session_state.label_encoders.items():
                                 if col in batch_df.columns:
-                                    batch_df[col] = le.transform(batch_df[col].astype(str))
-        
-                        # ✅ Align with model's features
+                                    new_values = batch_df[col].astype(str)
+                                    unseen = set(new_values.unique()) - set(le.classes_)
+                                    if unseen:
+                                        st.error(f"🚫 Unseen values in column '{col}': {unseen}")
+                                        st.stop()
+                                    batch_df[col] = le.transform(new_values)
+
+                        # ✅ Align with model's expected features
                         if hasattr(model, "feature_names_in_"):
                             expected_features = model.feature_names_in_
-                            batch_df = batch_df[[col for col in expected_features if col in batch_df.columns]]
-        
+                            missing_features = [col for col in expected_features if col not in batch_df.columns]
+                            if missing_features:
+                                st.error(f"🚫 Missing required features: {missing_features}")
+                                st.stop()
+                            batch_df = batch_df[expected_features]
+
                         target = st.session_state.target
-        
+
                         # ✅ Predict
                         predictions = model.predict(batch_df)
-        
-                        # ✅ Decode prediction if label encoder exists
+
+                        # ✅ Decode if classification
                         if 'label_encoder' in st.session_state:
                             predictions = st.session_state.label_encoder.inverse_transform(predictions)
-        
+
                         batch_df[f"Pred {target}"] = predictions
-        
+
                         st.success("✅ Batch predictions done!")
                         st.dataframe(batch_df)
-        
+
+                        # ✅ Optional: Accuracy if actual target is in file
+                        if target in batch_df.columns:
+                            true_y = batch_df[target]
+                            pred_y = batch_df[f"Pred {target}"]
+                            accuracy = accuracy_score(true_y, pred_y)
+                            st.info(f"🎯 Prediction Accuracy: {accuracy * 100:.2f}%")
+
                         csv = batch_df.to_csv(index=False).encode()
                         st.download_button("📥 Download Predictions", data=csv, file_name="batch_predictions.csv", mime="text/csv")
-        
+
                     except NotFittedError:
                         st.error("❌ The model is not trained yet.")
                     except Exception as e:
                         st.error(f"🚫 Prediction error: {e}")
-        
+
             except Exception as e:
                 st.error(f"🚫 File Read Error: {e}")
 
