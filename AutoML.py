@@ -333,7 +333,7 @@ def eda(data):
                 from pandas.plotting import andrews_curves
                 target = st.selectbox("Target column (categorical)", d.select_dtypes(include='object').columns)
                 fig, ax = plt.subplots()
-                andrews_curves(d, class_column=target, ax=ax)
+                andrews_curves(d, target=target, ax=ax)
                 st.pyplot(fig)
 
     #Scalling
