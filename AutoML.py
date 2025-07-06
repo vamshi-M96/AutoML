@@ -163,18 +163,52 @@ def eda(data):
 
         return d
 #Datatypes
-    def change_column_dtype(df,key_prefix=""):
-       
-
-        col = st.sidebar.selectbox("Column", df.columns,key=f"{key_prefix}_col")
-        dtype = st.sidebar.selectbox("Type", ["object", "int64", "float64", "bool", "datetime64"],key=f"{key_prefix}_dtype")
-        if st.button("Convert",key=f"{key_prefix}_convert"):
-            try:
-                df[col] = pd.to_datetime(df[col]) if dtype == "datetime64" else df[col].astype(dtype)
-                st.success("Converted dtypes")
-            except Exception as e:
-                st.error(e)
+    def change_column_dtype_per_column(df, key_prefix=""):
+        st.sidebar.markdown("### 🔄 Change Dtype Per Column")
+    
+        # Step 1: Select multiple columns
+        selected_columns = st.sidebar.multiselect("🧱 Select Columns", df.columns, key=f"{key_prefix}_cols")
+    
+        # Step 2: Select dtype for each column
+        conversions = {}
+        for col in selected_columns:
+            dtype = st.sidebar.selectbox(
+                f"🔁 Convert `{col}` to:",
+                ["object", "string", "int64", "float64", "bool", "datetime64"],
+                key=f"{key_prefix}_{col}_dtype"
+            )
+            conversions[col] = dtype
+    
+        # Step 3: Convert on button click
+        if st.sidebar.button("✅ Apply Conversions", key=f"{key_prefix}_apply"):
+            success, failed = [], []
+    
+            for col, dtype in conversions.items():
+                try:
+                    if dtype == "datetime64":
+                        df[col] = pd.to_datetime(df[col], errors="coerce")
+                    elif dtype in ["int64", "float64"]:
+                        df[col] = pd.to_numeric(df[col], errors="coerce")
+                    elif dtype == "bool":
+                        df[col] = df[col].astype(bool)
+                    elif dtype == "string":
+                        df[col] = df[col].astype("string")
+                    else:  # object or other types
+                        df[col] = df[col].astype(dtype)
+    
+                    success.append(col)
+                except Exception as e:
+                    failed.append((col, str(e)))
+    
+            # Feedback
+            if success:
+                st.sidebar.success(f"✅ Converted: {', '.join(success)}")
+            if failed:
+                for col, err in failed:
+                    st.sidebar.error(f"❌ `{col}`: {err}")
+    
         return df
+
     
 
     def split(d):
