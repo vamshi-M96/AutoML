@@ -1,33 +1,37 @@
 # ⚙️ AutoML Streamlit App
 
-An interactive and no-code AutoML tool built with **Streamlit** that allows users to:
+An interactive **no-code AutoML tool** built with Streamlit that allows users to:
 
-- 📥 Upload a CSV /xlsx dataset
-- 🔍 Perform EDA (Exploratory Data Analysis)
-- 🧠 Train multiple classification or regression models
-- 📊 Evaluate model performance
-- 🏆 Download the best-performing model (based on test metrics)
+- 📥 Upload datasets (CSV/XLSX)
+- 🔍 Perform Exploratory Data Analysis (EDA)
+- 🧠 Train multiple machine learning models (Classification or Regression)
+- 📊 Evaluate model performance with accuracy, R², RMSE, etc.
+- 🏆 Automatically select and download the best-performing model
+- 🔮 Make predictions (manually or in batch)
 
 ---
 
 ## 🚀 Features
 
-- Auto-detects classification vs. regression tasks
-- Supports common models like:
-  - Linear, Ridge, Lasso, ElasticNet
-  - Decision Trees, Random Forest, Gradient Boosting
-  - KNN, XGBoost, LightGBM, SVR
-- Hyperparameter tuning via GridSearchCV
-- Interactive plots and profiling
-- Downloadable `.pkl` file of the best model
+✅ Auto-detects task type (Classification vs. Regression)  
+✅ Built-in models:
+- **Regression**: Linear, Ridge, Lasso, ElasticNet, SVR, RandomForest, XGBoost, LightGBM
+- **Classification**: Logistic Regression, RandomForest, KNN, SVC, Naive Bayes, XGBoost, LGBM, Bagging, Decision Tree
+
+✅ Model tuning via `GridSearchCV` & `RandomizedSearchCV`  
+✅ PCA support for dimensionality reduction  
+✅ Visualizations: Histograms, Boxplots, Correlation Heatmaps, Countplots, Pairplots  
+✅ Predictive Power Score (PPS) & Sweetviz Report  
+✅ Download `.pkl` file of best model  
+✅ Manual and batch prediction with encoded/decoded outputs
 
 ---
 
-## 🛠️ How to Run
+## 🛠️ How to Run Locally
 
-> ⚠️ Before you begin: Make sure you have Python 3.7+ and `pip` installed.
+> ⚠️ Requires Python 3.7+ and pip
 
-1. **Clone the repository**  
-   ```bash
-   git clone https://github.com/vamshi-M96/AutoML.git
-   cd AutoML
+### 1. Clone the repository
+```bash
+git clone https://github.com/vamshi-M96/AutoML.git
+cd AutoML
