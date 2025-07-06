@@ -92,6 +92,14 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+with st.expander("ℹ️ How to Use the App"):
+    st.markdown("""
+    1. **Upload data** in CSV/XLSX format
+    2. Perform EDA & preprocessing
+    3. Select task (Classification/Regression)
+    4. Train models and download best
+    5. Make predictions using manual input or batch file
+    """)
 
 #data= st.file_uploader("upload file",type=['csv','xlsx'])
 
