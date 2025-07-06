@@ -1140,7 +1140,19 @@ with tab4:
                     options = x[col].dropna().unique().tolist()
                     input_data[col] = st.selectbox(f"{col}", options, key=col)
                 else:
-                    input_data[col] = st.number_input(f"{col}", value=float(x[col].mean()), key=col)
+                    col_min = x[col].min()
+                    col_max = x[col].max()
+                    mean_val = round(x[col].mean(), 2)
+                    unit = "units"  # You can set custom units per column if needed
+
+                    st.markdown(f"**{col}** *(Min: {col_min}, Max: {col_max}, Unit: {unit})*")
+                    input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=col)
+
+                    try:
+                        input_data[col] = float(input_val)
+                    except ValueError:
+                        st.warning(f"⚠️ Please enter a valid number for '{col}'.")
+                        st.stop()
 
             submitted = st.form_submit_button("🔮 Predict")
 
@@ -1148,7 +1160,7 @@ with tab4:
             input_df = pd.DataFrame([input_data])
             try:
                 check_is_fitted(model)
-                prediction = model.predict(input_df)[0]
+                prediction_encoded = model.predict(input_df)[0]
 
                 if 'label_encoder' in st.session_state:
                     prediction = st.session_state.label_encoder.inverse_transform([prediction_encoded])[0]
@@ -1214,8 +1226,6 @@ with tab4:
 
 
     def predict_with_best_model():
-        st.header("🔮 Predict with Trained Model")
-
         # Improved session check to prevent NoneType errors
         if not all(
             k in st.session_state and st.session_state[k] is not None
