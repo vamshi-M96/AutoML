@@ -94,11 +94,11 @@ st.markdown(
 
 with st.expander("ℹ️ How to Use the App"):
     st.markdown("""
-    📂 **Upload data** in CSV/XLSX format
-    🪛 Perform EDA & preprocessing
-     🪡Select task (Classification/Regression)
-    🚃 Train models and download best
-    🔮 Make predictions using manual input or batch file
+    📂 **Upload data** in CSV/XLSX format.
+    🪛 Perform EDA & preprocessing.
+     🪡Select task (Classification/Regression).
+    🚃 Train models and download best.
+    🔮 Make predictions using manual input or batch file.
     """)
 
 #data= st.file_uploader("upload file",type=['csv','xlsx'])
