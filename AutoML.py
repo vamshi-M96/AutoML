@@ -69,8 +69,10 @@ from sklearn.preprocessing import (
 )
 from sklearn.utils import resample
 from sklearn.decomposition import PCA
+from sklearn.exceptions import NotFittedError
 from sklearn.exceptions import FitFailedWarning
 from sklearn.utils.validation import check_is_fitted
+
 
 
 import warnings
