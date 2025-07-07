@@ -436,6 +436,9 @@ def eda(data):
         else:
             return d
 
+    if 'Unnamed: 0' in data.columns:
+        data.drop(columns=['Unnamed: 0'], inplace=True)
+    
     df=data.copy()
     st.sidebar.subheader("Additional EDA process")
     
