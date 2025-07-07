@@ -533,7 +533,9 @@ def apply_pca(data):
 
     # Optional: Scale data
     scale = st.checkbox("Scale data before PCA", value=True)
-    X = StandardScaler().fit_transform(data) if scale else data.copy()
+    X = StandardScaler().fit_transform(data) if scale else data.copy(); st.session_state["scaler_used"] = scale
+    if scale:
+        joblib.dump(StandardScaler().fit(data), "scaler.pkl")
 
     # Select number of components
     n_components = st.slider("Select number of components", 2, min(len(data.columns), 10), value=2)
@@ -542,7 +544,7 @@ def apply_pca(data):
     pca = PCA(n_components=n_components)
     pca_data = pca.fit_transform(X)
 
-    joblib.dump(pca_data, "pca_model.pkl")
+    joblib.dump(pca, "pca_model.pkl")
     with open("pca_model.pkl", "rb") as f:
         st.download_button("📥 Download PCA Model", f, file_name="pca_model.pkl")
 
@@ -1167,10 +1169,8 @@ with tab4:
 
 
 
-    def manual_input_prediction(model):
+    def manual_input_prediction(model,apply_pca=False):
         st.subheader("📝 Manual Input for Prediction")
-
-
 
         if "raw_df" not in st.session_state or "target" not in st.session_state:
             st.error("❌ Missing raw dataset or target variable. Please load data and train a model first.")
@@ -1212,6 +1212,18 @@ with tab4:
 
         if submitted:
             input_df = pd.DataFrame([input_data])
+ 
+                 # Encode
+            for col, le in st.session_state.get("label_encoders", {}).items():
+                if col in input_df.columns:
+                    input_df[col] = le.transform(input_df[col].astype(str))
+
+            if apply_pca:
+                scaler = joblib.load("scaler.pkl")
+                pca = joblib.load("pca_model.pkl")
+                transformed_np = pca.transform(scaler.transform(input_df))
+                input_df = pd.DataFrame(transformed_np, columns=[f"PC{i+1}" for i in range(transformed_np.shape[1])])
+                
             try:
                 check_is_fitted(model)
         
@@ -1238,7 +1250,7 @@ with tab4:
                 st.error(f"🚫 Prediction error: {e}")
 
 
-    def batch_file_prediction(model):
+    def batch_file_prediction(model,,apply_pca=False):
         st.subheader("📂 Batch Prediction from CSV")
 
         uploaded_file = st.file_uploader("Upload a CSV file with the same feature columns", type=["csv"])
@@ -1279,6 +1291,13 @@ with tab4:
                             batch_df = batch_df[expected_features]
 
                         target = st.session_state.target
+
+                        if apply_pca:
+                            scaler = joblib.load("scaler.pkl")
+                            pca = joblib.load("pca_model.pkl")
+                            transformed_np = pca.transform(scaler.transform(batch_df))
+                            batch_df = pd.DataFrame(transformed_np, columns=[f"PC{i+1}" for i in range(transformed_np.shape[1])])
+
 
                         # ✅ Predict
                         predictions = model.predict(batch_df)
