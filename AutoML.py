@@ -149,6 +149,7 @@ def eda(data):
             if col == target_col:
                 st.session_state.label_encoder = le
                 st.session_state.label_encoded_target = col
+                st.session_state.label_map = dict(zip(le.transform(le.classes_), le.classes_))
     
         st.session_state.label_encoders = label_encoders  # ✅ store in session state
         st.success("✅ Label encoding applied to object columns")
@@ -1264,11 +1265,10 @@ with tab4:
                 # Predict
                 prediction_encoded = model.predict(input_df)[0]
                 
-                # Decode prediction
-                if 'label_encoder' in st.session_state:
-                    prediction_decoded = st.session_state.label_encoder.inverse_transform([prediction_encoded])[0]
-                else:
-                    prediction_decoded = prediction_encoded
+                # ✅ Decode prediction using stored label map (avoids inverse_transform issues)
+                label_map = st.session_state.get("label_map", {})  # e.g., {0: "low", 1: "medium", 2: "high"}
+                prediction_decoded = label_map.get(prediction_encoded, prediction_encoded)
+
                 
                 # Show prediction
                 target = st.session_state.target
