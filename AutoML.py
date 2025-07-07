@@ -435,7 +435,7 @@ def eda(data):
     df=data.copy()
     st.sidebar.subheader("Additional EDA process")
     
-    if st.sidebar.checkbox("🧹 Drop Duplicate Rows"):
+    if st.sidebar.toggle("🧹 Drop Duplicate Rows"):
         before = df.shape[0]
         df = drop_dup(df)
         after = df.shape[0]
