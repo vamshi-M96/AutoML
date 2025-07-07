@@ -1102,8 +1102,7 @@ if "result" not in st.session_state:
     st.session_state.result = None
 if "best_model" not in st.session_state:
     st.session_state.best_model = None
-if 'label_encoder' in st.session_state:
-    st.write("Target classes:", st.session_state.label_encoder.classes_)
+
 
 # App layout
 
@@ -1264,17 +1263,19 @@ with tab4:
                 
                 # Predict
                 prediction_encoded = model.predict(input_df)[0]
-                
+                task_type = st.session_state.get("task_type", "classification")
+                if task_type == "classification":
                 # ✅ Decode prediction using stored label map (avoids inverse_transform issues)
-                label_map = st.session_state.get("label_map", {})  # e.g., {0: "low", 1: "medium", 2: "high"}
-                prediction_decoded = label_map.get(prediction_encoded, prediction_encoded)
-
+                    label_map = st.session_state.get("label_map", {})  # e.g., {0: "low", 1: "medium", 2: "high"}
+                    prediction_decoded = label_map.get(prediction_encoded, prediction_encoded)
+                else:
+                    prediction = prediction_encoded
                 
                 # Show prediction
                 target = st.session_state.target
                 st.success(f"✅ Prediction: {target} → {prediction_decoded}")
                 
-                st.dataframe(input_df.assign(Prediction=[prediction_decoded]))
+                st.dataframe(input_df.assign(**{target: [prediction_decoded]}))
 
         
             except NotFittedError:
@@ -1336,9 +1337,13 @@ with tab4:
                         predictions = model.predict(batch_df)
 
                         # ✅ Decode if classification
-                        if 'label_encoder' in st.session_state:
-                            predictions = st.session_state.label_encoder.inverse_transform(predictions)
-
+                        task_type = st.session_state.get("task_type", "classification")
+                        if task_type == "classification":
+                            label_map = st.session_state.get("label_map", {})
+                            prediction = label_map.get(prediction_encoded, prediction_encoded)
+                        else:
+                            prediction = prediction_encoded
+                            
                         batch_df[f"Pred {target}"] = predictions
 
                         st.success("✅ Batch predictions done!")
