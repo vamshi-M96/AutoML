@@ -1245,8 +1245,8 @@ with tab4:
                     prediction = st.session_state.label_encoder.inverse_transform([prediction_encoded])[0]
                 else:
                     prediction = prediction_encoded
-        
-                st.success(f"✅ Prediction: {prediction}")
+                target = st.session_state.target
+                st.success(f"✅ Prediction: {st.session_state.target} → {prediction}")
                 st.dataframe(input_df.assign(Prediction=[prediction]))
         
             except NotFittedError:
