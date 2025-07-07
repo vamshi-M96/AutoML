@@ -1101,6 +1101,8 @@ if "result" not in st.session_state:
     st.session_state.result = None
 if "best_model" not in st.session_state:
     st.session_state.best_model = None
+if 'label_encoder' in st.session_state:
+    st.write("Target classes:", st.session_state.label_encoder.classes_)
 
 # App layout
 
@@ -1271,8 +1273,7 @@ with tab4:
                 # Show prediction
                 target = st.session_state.target
                 st.success(f"✅ Prediction: {target} → {prediction_decoded}")
-                st.write("LabelEncoder classes:", st.session_state.label_encoder.classes_)
-                # Show input with prediction
+                
                 st.dataframe(input_df.assign(Prediction=[prediction_decoded]))
 
         
