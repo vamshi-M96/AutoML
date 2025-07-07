@@ -1271,7 +1271,7 @@ with tab4:
                 # Show prediction
                 target = st.session_state.target
                 st.success(f"✅ Prediction: {target} → {prediction_decoded}")
-                
+                st.write("LabelEncoder classes:", st.session_state.label_encoder.classes_)
                 # Show input with prediction
                 st.dataframe(input_df.assign(Prediction=[prediction_decoded]))
 
