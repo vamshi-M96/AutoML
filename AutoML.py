@@ -1209,13 +1209,14 @@ with tab4:
             input_data = {}
             for col in feature_cols:
                 for col in x.columns:
-                     if col not in df_raw.columns:
+                    if col not in df_raw.columns:
                         st.warning(f"⚠️ Column '{col}' not found in original dataset.")
                         continue
                 
                     if df_raw[col].dtype == "object" or df_raw[col].dtype.name == "category":
                         options = df_raw[col].dropna().unique().tolist()
                         input_data[col] = st.selectbox(f"{col}", options, key=col)
+
                     else:
                         col_min = df_raw[col].min()
                         col_max = df_raw[col].max()
