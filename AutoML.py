@@ -1208,31 +1208,31 @@ with tab4:
         with st.form("manual_input_form"):
             input_data = {}
             for col in feature_cols:
-                for col in x.columns:
-                    unique_key = f"manual_input_{col}_form"
-                    if col not in df_raw.columns:
-                        st.warning(f"⚠️ Column '{col}' not found in original dataset.")
-                        continue
                 
-                    if df_raw[col].dtype == "object" or df_raw[col].dtype.name == "category":
-                        options = df_raw[col].dropna().unique().tolist()
-                        input_data[col] = st.selectbox(f"{col}", options, key=col)
+                unique_key = f"manual_input_{col}_form"
+                if col not in df_raw.columns:
+                    st.warning(f"⚠️ Column '{col}' not found in original dataset.")
+                    continue
+            
+                if df_raw[col].dtype == "object" or df_raw[col].dtype.name == "category":
+                    options = df_raw[col].dropna().unique().tolist()
+                    input_data[col] = st.selectbox(f"{col}", options, key=col)
 
-                    else:
-                        col_min = df_raw[col].min()
-                        col_max = df_raw[col].max()
-                        mean_val = round(df_raw[col].mean(), 2)
-                        unit = "units"  # You can set custom units per column if needed
-    
-                        st.markdown(f"**{col}** *(Min: {col_min}, Max: {col_max}, Unit: {unit})*")
-                        input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=unique_key)
+                else:
+                    col_min = df_raw[col].min()
+                    col_max = df_raw[col].max()
+                    mean_val = round(df_raw[col].mean(), 2)
+                    unit = "units"  # You can set custom units per column if needed
 
-    
-                        try:
-                            input_data[col] = float(input_val)
-                        except ValueError:
-                            st.warning(f"⚠️ Please enter a valid number for '{col}'.")
-                            st.stop()
+                    st.markdown(f"**{col}** *(Min: {col_min}, Max: {col_max}, Unit: {unit})*")
+                    input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=unique_key)
+
+
+                    try:
+                        input_data[col] = float(input_val)
+                    except ValueError:
+                        st.warning(f"⚠️ Please enter a valid number for '{col}'.")
+                        st.stop()
 
             submitted = st.form_submit_button("🔮 Predict")
 
