@@ -1224,7 +1224,8 @@ with tab4:
                         unit = "units"  # You can set custom units per column if needed
     
                         st.markdown(f"**{col}** *(Min: {col_min}, Max: {col_max}, Unit: {unit})*")
-                        input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=col)
+                        input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=f"manual_input_{col}")
+
     
                         try:
                             input_data[col] = float(input_val)
