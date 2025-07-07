@@ -1271,7 +1271,7 @@ with tab4:
                     decoded_target = st.session_state.label_encoder.inverse_transform([prediction])[0]
                     st.success(f"✅ Prediction: {original_target} → {decoded_target}")
                 else:
-                    st.success(f"✅ Prediction: {original_target} → {prediction}")
+                    st.success(f"✅ Prediction: {target} → {prediction}")
                 st.success(f"✅ Prediction: {st.session_state.target} → {prediction}")
                 st.dataframe(input_df.assign(Prediction=[prediction]))
         
