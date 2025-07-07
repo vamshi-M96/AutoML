@@ -1250,7 +1250,7 @@ with tab4:
                 st.error(f"🚫 Prediction error: {e}")
 
 
-    def batch_file_prediction(model,,apply_pca=False):
+    def batch_file_prediction(model,apply_pca=False):
         st.subheader("📂 Batch Prediction from CSV")
 
         uploaded_file = st.file_uploader("Upload a CSV file with the same feature columns", type=["csv"])
@@ -1347,6 +1347,11 @@ with tab4:
 
         st.subheader("📄 Choose Input Type")
         input_type = st.radio("Select input type:", ["📄 Manual Input", "📂 Upload Batch File"])
+# ✅ Only show checkbox if PCA was used in training
+        use_pca = st.session_state.get("use_pca", False)
+        apply_pca = False
+        if use_pca:
+            apply_pca = st.checkbox("🧠 Apply PCA for Prediction", value=True)
 
         if input_type == "📄 Manual Input":
             manual_input_prediction(model)
