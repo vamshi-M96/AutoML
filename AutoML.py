@@ -433,7 +433,7 @@ def eda(data):
             return d
 
     df=data.copy()
-
+    st.sidebar.subheader("Additional EDA process") 
     if st.sidebar.checkbox("🧹 Drop Duplicate Rows"):
         before = df.shape[0]
         df = drop_dup(df)
@@ -449,7 +449,7 @@ def eda(data):
     info_string = buffer.getvalue()
     st.code(info_string)
 
-    st.sidebar.subheader("Additional EDA process")  
+     
     fig, ax = plt.subplots()
     sns.barplot(df,ax=ax)
     st.pyplot(fig)
