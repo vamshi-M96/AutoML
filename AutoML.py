@@ -146,9 +146,9 @@ def eda(data):
             d[col] = le.fit_transform(d[col].astype(str))
             label_encoders[col] = le  # store encoder per column
                 # ✅ If this is the target column, store separately for decoding predictions later
-        if col == target_col:
-            st.session_state.label_encoder = le
-            st.session_state.label_encoded_target = col
+            if col == target_col:
+                st.session_state.label_encoder = le
+                st.session_state.label_encoded_target = col
     
         st.session_state.label_encoders = label_encoders  # ✅ store in session state
         st.success("✅ Label encoding applied to object columns")
