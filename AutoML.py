@@ -1258,18 +1258,23 @@ with tab4:
                     for col, le in st.session_state.label_encoders.items():
                         if col in input_df.columns:
                             input_df[col] = le.transform([input_df[col][0]])
-        
-                prediction_encoded = model.predict(input_df)[0]
-        
-                # ✅ Decode target if label_encoder exists
-                if 'label_encoder' in st.session_state:
-                    prediction = st.session_state.label_encoder.inverse_transform([prediction_encoded])[0]
-                else:
-                    prediction = prediction_encoded
-                target = st.session_state.target
                 
-                st.success(f"✅ Prediction: {st.session_state.target} → {prediction}")
-                st.dataframe(input_df.assign(Prediction=[prediction]))
+                # Predict
+                prediction_encoded = model.predict(input_df)[0]
+                
+                # Decode prediction
+                if 'label_encoder' in st.session_state:
+                    prediction_decoded = st.session_state.label_encoder.inverse_transform([prediction_encoded])[0]
+                else:
+                    prediction_decoded = prediction_encoded
+                
+                # Show prediction
+                target = st.session_state.target
+                st.success(f"✅ Prediction: {target} → {prediction_decoded}")
+                
+                # Show input with prediction
+                st.dataframe(input_df.assign(Prediction=[prediction_decoded]))
+
         
             except NotFittedError:
                 st.error("❌ Model not trained. Please train it before prediction.")
