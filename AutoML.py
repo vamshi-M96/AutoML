@@ -1196,30 +1196,40 @@ with tab4:
             st.error("❌ Target column not found in the uploaded dataset.")
             return
 
-        x = df_raw.drop(columns=[target])  # Use only input features
+        # Use only input features
 
-
+            # ✅ Use saved feature names instead of df_raw.columns
+        if "feature_names" not in st.session_state:
+            st.error("❌ Feature names not found in session. Please train a model first.")
+            return
+    
+        feature_cols = st.session_state.feature_names
         # Use a form to group all input fields together
         with st.form("manual_input_form"):
             input_data = {}
-            for col in x.columns:
-                if x[col].dtype == "object" or x[col].dtype.name == "category":
-                    options = x[col].dropna().unique().tolist()
-                    input_data[col] = st.selectbox(f"{col}", options, key=col)
-                else:
-                    col_min = x[col].min()
-                    col_max = x[col].max()
-                    mean_val = round(x[col].mean(), 2)
-                    unit = "units"  # You can set custom units per column if needed
-
-                    st.markdown(f"**{col}** *(Min: {col_min}, Max: {col_max}, Unit: {unit})*")
-                    input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=col)
-
-                    try:
-                        input_data[col] = float(input_val)
-                    except ValueError:
-                        st.warning(f"⚠️ Please enter a valid number for '{col}'.")
-                        st.stop()
+            for col in feature_cols:
+                for col in x.columns:
+                     if col not in df_raw.columns:
+                        st.warning(f"⚠️ Column '{col}' not found in original dataset.")
+                        continue
+                
+                    if df_raw[col].dtype == "object" or df_raw[col].dtype.name == "category":
+                        options = df_raw[col].dropna().unique().tolist()
+                        input_data[col] = st.selectbox(f"{col}", options, key=col)
+                    else:
+                        col_min = df_raw[col].min()
+                        col_max = df_raw[col].max()
+                        mean_val = round(df_raw[col].mean(), 2)
+                        unit = "units"  # You can set custom units per column if needed
+    
+                        st.markdown(f"**{col}** *(Min: {col_min}, Max: {col_max}, Unit: {unit})*")
+                        input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=col)
+    
+                        try:
+                            input_data[col] = float(input_val)
+                        except ValueError:
+                            st.warning(f"⚠️ Please enter a valid number for '{col}'.")
+                            st.stop()
 
             submitted = st.form_submit_button("🔮 Predict")
 
@@ -1295,13 +1305,13 @@ with tab4:
                                     batch_df[col] = le.transform(new_values)
 
                         # ✅ Align with model's expected features
-                        if hasattr(model, "feature_names_in_"):
-                            expected_features = model.feature_names_in_
-                            missing_features = [col for col in expected_features if col not in batch_df.columns]
-                            if missing_features:
-                                st.error(f"🚫 Missing required features: {missing_features}")
-                                st.stop()
-                            batch_df = batch_df[expected_features]
+                        
+                        expected_features = st.session_state.feature_names
+                        missing_features = [col for col in expected_features if col not in batch_df.columns]
+                        if missing_features:
+                            st.error(f"🚫 Missing required features: {missing_features}")
+                            st.stop()
+                        batch_df = batch_df[expected_features]
 
                         target = st.session_state.target
 
