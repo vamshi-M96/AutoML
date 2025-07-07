@@ -1209,6 +1209,7 @@ with tab4:
             input_data = {}
             for col in feature_cols:
                 for col in x.columns:
+                    unique_key = f"manual_input_{col}_form"
                     if col not in df_raw.columns:
                         st.warning(f"⚠️ Column '{col}' not found in original dataset.")
                         continue
@@ -1224,7 +1225,7 @@ with tab4:
                         unit = "units"  # You can set custom units per column if needed
     
                         st.markdown(f"**{col}** *(Min: {col_min}, Max: {col_max}, Unit: {unit})*")
-                        input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=f"manual_input_{col}")
+                        input_val = st.text_input(f"{col}", value=str(round(x[col].mean(), 2)), key=unique_key)
 
     
                         try:
